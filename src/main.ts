@@ -3,14 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import * as cookieParser from 'cookie-parser';
 
 function setApiDocs(app: INestApplication, path: string) {
   const config = new DocumentBuilder()
-    .setTitle('Facebook API examples')
-    .setDescription('The Facebook Graph API playground')
+    .setTitle('Rest API examples')
+    .setDescription('The Rest API playground')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
@@ -26,6 +26,15 @@ async function bootstrap() {
   if ('development' === nodeEnv) {
     setApiDocs(app, apiDocPath);
   }
+  app.useGlobalPipes(
+    new ValidationPipe({
+      enableDebugMessages: 'development' === nodeEnv,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
   app.use(cookieParser());
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
